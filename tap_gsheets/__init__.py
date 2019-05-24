@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 
 import singer
-from singer import utils
 from tap_gsheets.gsheet_loader import GSheetsLoader
-
-REQUIRED_CONFIG_KEYS = [
-    "sheet_name",
-    "gsheets_api"
-]
-LOGGER = singer.get_logger()
-
+from pyhocon import ConfigFactory
+import argparse
 
 def sync(config):
     """
@@ -26,13 +20,23 @@ def sync(config):
     )
 
 
-@utils.handle_top_exception(LOGGER)
 def main():
 
-    # Parse command line arguments
-    args = utils.parse_args(REQUIRED_CONFIG_KEYS)
+    # parse arguments. get config file path.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', help='config file', required=True)
+    args = parser.parse_args()
 
-    sync(args.config)
+    # the configuration file can be provided in json as much as in hocon
+    # ConfigFactory will pick up the format from the file extension
+    config = ConfigFactory.parse_file(args.c)
+
+    # we like to keep the config as a dict from here on
+    config = config.as_plain_ordered_dict()
+
+    # go on processing
+    sync(config)
+
 
 if __name__ == "__main__":
     main()

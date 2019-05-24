@@ -12,7 +12,8 @@ setup(
     install_requires=[
         "singer-python>=5.0.12",
         "gspread",
-        "oauth2client"
+        "oauth2client",
+        "pyhocon"
     ],
     entry_points="""
     [console_scripts]
