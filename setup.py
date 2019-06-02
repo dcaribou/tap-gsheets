@@ -13,7 +13,8 @@ setup(
         "singer-python>=5.0.12",
         "gspread",
         "oauth2client",
-        "pyhocon"
+        "pyhocon",
+        "genson"
     ],
     entry_points="""
     [console_scripts]

@@ -3,6 +3,7 @@
 import singer
 from tap_gsheets.gsheet_loader import GSheetsLoader
 from pyhocon import ConfigFactory
+from inflection import parameterize, tableize
 import argparse
 
 def sync(config):
@@ -13,10 +14,17 @@ def sync(config):
 
     gsheets_loader = GSheetsLoader(config['gsheets_api'])
     sheet_name = config['sheet_name']
+    snake_cased = tableize(parameterize(sheet_name))
+
+    singer.write_schema(
+        stream_name=snake_cased,
+        schema=gsheets_loader.get_schema(sheet_name),
+        key_properties=['id']
+    )
 
     singer.write_records(
-        sheet_name,
-        gsheets_loader.get_records_as_json(sheet_name)
+        stream_name=snake_cased,
+        records=gsheets_loader.get_records_as_json(sheet_name)
     )
 
 
