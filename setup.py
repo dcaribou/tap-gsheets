@@ -14,7 +14,8 @@ setup(
         "gspread",
         "oauth2client",
         "pyhocon",
-        "genson"
+        "genson",
+        "inflection"
     ],
     entry_points="""
     [console_scripts]
