@@ -6,7 +6,7 @@ spec](https://github.com/singer-io/getting-started/blob/master/SPEC.md).
 The tap uses the Google API underneath for accessing sheets data, so you need to
 [create some credentials accordingly](https://towardsdatascience.com/accessing-google-spreadsheet-data-using-python-90a5bc214fd2).
 
-Once you have your credentials, you need to put them in the `gsheets_api` key in the configuration file so they are picked up by the tap. With another key `sheet_name` one select the spreadsheet to be extracted.
+Once you have your credentials, you need to put them in the `gsheets_api` key in the configuration file so they are picked up by the tap. With another key `sheet_name` one selects the spreadsheet to be extracted.
 
 The tap supports configuration files in JSON as much as in [HOCON](https://github.com/chimpler/pyhocon) format. Use a `.json` extension for JSON format and a `.conf` extension for HOCON format.
 
@@ -35,7 +35,15 @@ tap-gsheets -c config.conf
 # {"type": "RECORD", "stream": "Investor Loans", "record": {"id": 11, "start_date": "2018-08-22", "end_date": "2020-04-17", "investor": "Banking Corp", "amount": 20000000, "interest_rate": 0.20, "add_to_capital": "FALSE", "user_id": "some_user", "created_at": "2018-08-22 11:00:40", "updated_at": "2018-08-22 11:00:40"}}
 ```
 
-# Run
+# Overriding configuration
+The configurations in the file can be overriden with the command line parameter `--overrides`,
+which takes configuration overrides in a JSON string and applies them over the passed
+config file.
+```bash
+tap-gsheets -c config.conf --overrides '{"sheet_name":"2019 Baseball Games"}'
+```
+
+# Install
 To install the `tap-gsheets` utility as a system command, create and activate a
 Python3 virtual environment
 ```bash
