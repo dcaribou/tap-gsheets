@@ -19,12 +19,14 @@ class GSheetsLoader:
         client = gspread.authorize(creds)
         self.client = client
         self.data = None
+        self.headers = None
         self.schema = None
 
     def get_data(self, sheet_name):
         if self.data is None:
             sheet1 = self.client.open(sheet_name).sheet1
             self.data = sheet1.get_all_records()
+            self.headers = sheet1.row_values(1)
 
     def get_records_as_json(self, sheet_name):
         self.get_data(sheet_name)
@@ -32,11 +34,17 @@ class GSheetsLoader:
 
     def get_schema(self, sheet_name):
         self.get_data(sheet_name)
+        # build sample record to be used for schema inference if the
+        # spreadsheet is empty
+        sample_record = {key: "some string" for key in self.headers}
 
         # add object to schema builder so he can infer schema
         builder = SchemaBuilder()
-        for record in self.data:
-            builder.add_object(record)
+        if len(self.data) == 0:
+            builder.add_object(sample_record)
+        else:
+            for record in self.data:
+                builder.add_object(record)
 
         # create a singer Schema from Json Schema
         singer_schema = Schema.from_dict(builder.to_schema())
