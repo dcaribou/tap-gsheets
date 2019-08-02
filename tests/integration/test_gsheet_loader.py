@@ -26,7 +26,7 @@ class TestSum(unittest.TestCase):
         Test that we are able to authenitcate provided some valid configs
         are passed
         """
-        GSheetsLoader(test_config)
+        GSheetsLoader(test_config).client.session.close()
 
     def test_get_schema(self):
         """
@@ -42,7 +42,12 @@ class TestSum(unittest.TestCase):
             "type": "object"
         }
 
-        self.assertEqual(expected_schema, loader.get_schema('Tap Gsheets Integration Tests'))
+        self.assertEqual(
+            expected_schema,
+            loader.get_schema('Tap Gsheets Integration Tests')
+        )
+
+        loader.client.session.close()
 
     def test_get_data(self):
         """
@@ -54,7 +59,12 @@ class TestSum(unittest.TestCase):
             {'ID': 50, 'Name': 'San Juan Bautista', 'RegisteredAt': '2019-04-02'}
         ]
 
-        self.assertEqual(expected_contents, loader.get_records_as_json('Tap Gsheets Integration Tests'))
+        self.assertEqual(
+            expected_contents,
+            loader.get_records_as_json('Tap Gsheets Integration Tests')
+        )
+
+        loader.client.session.close()
 
 
 if __name__ == '__main__':
