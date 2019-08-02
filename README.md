@@ -92,3 +92,7 @@ and install the package
 ```bash
 $ pip install -e .
 ```
+
+# Integration Tests
+The [integration tests spec](tests/integration/test_gsheet_loader.py) tests the project against a [sample Google sheet](https://docs.google.com/a/pagantis.com/spreadsheets/d/e/2PACX-1vRcyNFmNV4EXv_J7CyiIWjQOirwrZCXKQ5DKDMfr-lxV2iqgHMWdX14EKFXyS_tZZ4Xyn9jlpmZagzY/pubhtml).
+They can be executed running `python tests/integration/test_gsheet_loader.py`.
