@@ -5,7 +5,7 @@ setup(
     name="tap-gsheets",
     version="0.1.0",
     description="Singer.io tap for extracting data",
-    author="Stitch",
+    author="David Cereijo",
     url="http://singer.io",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_gsheets"],

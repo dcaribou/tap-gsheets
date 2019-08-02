@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          command: |  # we'll use pipenv to install dependencies
+            sudo pip install pipenv
+            pipenv install
+      - run:
+          command: pipenv install -e .
+      - run:
+          context: gsheets_readonly
+          command: pipenv run python tests/integration/test_gsheet_loader.py
