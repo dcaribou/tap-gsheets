@@ -7,6 +7,7 @@ import logging
 
 logging.getLogger('oauth2client').setLevel(logging.ERROR)
 
+
 class GSheetsLoader:
     """Wrapper for authenticating and retrieving data from Google Sheets"""
 
@@ -18,36 +19,51 @@ class GSheetsLoader:
         creds = ServiceAccountCredentials.from_json_keyfile_dict(config, scope)
         client = gspread.authorize(creds)
         self.client = client
-        self.data = None
-        self.headers = None
-        self.schema = None
+        self.data = {}
+        self.headers = {}
+        self.schema = {}
+        self.sheet_name = None
+        self.spreadsheet = None
 
-    def get_data(self, sheet_name):
-        if self.data is None:
-            sheet1 = self.client.open(sheet_name).sheet1
-            self.data = sheet1.get_all_records()
-            self.headers = sheet1.row_values(1)
+    def get_data(self, sheet_name, worksheet_name):
+        # reset cache in case of switching to another sheet
+        if self.sheet_name is None or self.sheet_name != sheet_name:
+            del self.data
+            self.data = {}
+            self.schema = {}
+            self.headers = {}
+            self.sheet_name = sheet_name
+            self.spreadsheet = self.client.open(sheet_name)
 
-    def get_records_as_json(self, sheet_name):
-        self.get_data(sheet_name)
-        return self.data
+        # backwards compatibility
+        if worksheet_name is None:
+            worksheet_name = self.spreadsheet.sheet1.title
 
-    def get_schema(self, sheet_name):
-        self.get_data(sheet_name)
-        # build sample record to be used for schema inference if the
-        # spreadsheet is empty
-        sample_record = {key: "some string" for key in self.headers}
+        if worksheet_name not in self.data:
+            sheet = self.spreadsheet.worksheet(worksheet_name)
+            self.data[worksheet_name] = sheet.get_all_records()
+            self.headers[worksheet_name] = sheet.row_values(1)
+
+    def get_records_as_json(self, sheet_name, worksheet_name):
+        self.get_data(sheet_name, worksheet_name)
+        return self.data[worksheet_name]
+
+    def get_schema(self, sheet_name, worksheet_name):
+        self.get_data(sheet_name, worksheet_name)
 
         # add object to schema builder so he can infer schema
         builder = SchemaBuilder()
-        if len(self.data) == 0:
+        if len(self.data[worksheet_name]) == 0:
+            # build sample record to be used for schema inference if the
+            # spreadsheet is empty
+            sample_record = {key: "some string" for key in self.headers[worksheet_name]}
             builder.add_object(sample_record)
         else:
-            for record in self.data:
+            for record in self.data[worksheet_name]:
                 builder.add_object(record)
 
         # create a singer Schema from Json Schema
         singer_schema = Schema.from_dict(builder.to_schema())
-        self.schema = singer_schema.to_dict()
+        self.schema[worksheet_name] = singer_schema.to_dict()
 
-        return self.schema
+        return self.schema[worksheet_name]

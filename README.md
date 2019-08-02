@@ -35,6 +35,43 @@ $ tap-gsheets -c config.conf
 {"type": "RECORD", "stream": "Investor Loans", "record": {"id": 11, "start_date": "2018-08-22", "end_date": "2020-04-17", "investor": "Banking Corp", "amount": 20000000, "interest_rate": 0.20, "add_to_capital": "FALSE", "user_id": "some_user", "created_at": "2018-08-22 11:00:40", "updated_at": "2018-08-22 11:00:40"}}
 ```
 
+## Additional config
+Import your service account config from the file Google provides:
+```hocon
+{ # config.conf
+  gsheets_api {
+    include "gcloud-team-name-001122334455.json"
+  }
+}
+```
+
+Change the table name format to singular form and convert column names to the valid database format:
+```hocon
+{ # config.conf
+  underscore_columns = True,
+  singular_table_name = True,
+}
+```
+
+Process several sheets and worksheets in that sheets at a time:
+```hocon
+{ # config.conf
+  sheets = [
+    {
+      name = "Investor Loans",
+      worksheets = [
+        PageA,
+        PageB,
+        PageC
+      ]
+    },
+    {
+      # ...
+    }
+  ]
+}
+```
+
 # Overriding configuration
 The configurations in the file can be overriden with the command line parameter `--overrides`,
 which takes configuration overrides in a JSON string and applies them over the passed
