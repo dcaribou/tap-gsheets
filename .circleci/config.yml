@@ -12,5 +12,11 @@ jobs:
       - run:
           command: pipenv install -e .
       - run:
-          context: gsheets_readonly
           command: pipenv run python tests/integration/test_gsheet_loader.py
+
+workflows:
+  version: 2
+  build-tap:
+    jobs:
+      - build:
+          context: gsheets_readonly
