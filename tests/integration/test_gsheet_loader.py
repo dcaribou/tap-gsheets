@@ -66,6 +66,20 @@ class TestSum(unittest.TestCase):
 
         loader.client.session.close()
 
+    def test_worksheet(self):
+        """Test that worksheet selection"""
+        loader = GSheetsLoader(test_config)
+
+        self.assertEqual(
+            [
+                {'ID': 30, 'Name': 'Bon Jovi', 'RegisteredAt': '2019-03-04'},
+                {'ID': 50, 'Name': 'Cat Stevens', 'RegisteredAt': '2019-04-02'}
+            ],
+            loader.get_records_as_json('Tap Gsheets Integration Tests', 'OtherWorksheet')
+        )
+
+        loader.client.session.close()
+
 
 if __name__ == '__main__':
     unittest.main()
