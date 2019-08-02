@@ -60,7 +60,7 @@ def process_worksheet(gsheets_loader, sheet_name, worksheet, config):
         stream_name = tableize(parameterize(name_with_worksheet))
 
     schema = gsheets_loader.get_schema(sheet_name, worksheet)
-    records = gsheets_loader.get_records_as_json(sheet_name, worksheet)
+    records = gsheets_loader.get_data(sheet_name, worksheet)
 
     # additional data transformations
     column_mapping = None
