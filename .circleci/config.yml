@@ -18,7 +18,8 @@ jobs:
       - run:
           command: pipenv run python tests/integration/test_gsheet_loader.py
       - run:
-          command: PRIVATE_KEY=$(echo $PRIVATE_KEY | base64 --decode) bats bats/cli.bats
+          command: |
+            PRIVATE_KEY=$(echo $PRIVATE_KEY | base64 --decode) pipenv run bats bats/cli.bats
 
 workflows:
   version: 2
