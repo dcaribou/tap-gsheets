@@ -1,6 +1,9 @@
-version: 2
+version: 2.1
+orbs:
+  orb-tools: circleci/orb-tools@8.27.2
+
 jobs:
-  build:
+  it-tests:
     docker:
       - image: circleci/python:3.7
     steps:
@@ -9,14 +12,17 @@ jobs:
           command: |  # we'll use pipenv to install dependencies
             sudo pip install pipenv
             pipenv install
+      - orb-tools/install-bats
       - run:
           command: pipenv install -e .
       - run:
           command: pipenv run python tests/integration/test_gsheet_loader.py
+      - run:
+          command: PRIVATE_KEY=$(echo $PRIVATE_KEY | base64 --decode) bats bats/cli.bats
 
 workflows:
   version: 2
   build-tap:
     jobs:
-      - build:
+      - it-tests:
           context: gsheets_readonly
