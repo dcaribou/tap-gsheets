@@ -7,12 +7,12 @@ jobs:
     docker:
       - image: circleci/python:3.7
     steps:
+      - orb-tools/install-bats
       - checkout
       - run:
           command: |  # we'll use pipenv to install dependencies
             sudo pip install pipenv
             pipenv install
-      - orb-tools/install-bats
       - run:
           command: pipenv install -e .
       - run:
