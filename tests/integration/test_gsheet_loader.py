@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import unittest
 
 from tap_gsheets.gsheet_loader import GSheetsLoader
