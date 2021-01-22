@@ -104,3 +104,5 @@ state.json
 
 *.iml
 
+.idea/
+cred.json
