@@ -32,6 +32,11 @@ def sync(config):
     for sheet in sheets:
         sheet_name = sheet["name"]
 
+        start_from_row = 1
+
+        if "start_from_row" in sheet:
+            start_from_row = sheet["start_from_row"]
+
         if "worksheets" in sheet:
             worksheets = sheet["worksheets"]
         else:
@@ -41,14 +46,14 @@ def sync(config):
         try:
             if len(worksheets) > 0:
                 for worksheet in worksheets:
-                    process_worksheet(gsheets_loader, sheet_name, worksheet, config)
+                    process_worksheet(gsheets_loader, sheet_name, worksheet, start_from_row, config)
             else:
-                process_worksheet(gsheets_loader, sheet_name, None, config)
+                process_worksheet(gsheets_loader, sheet_name, None, start_from_row, config)
         except Exception as e:
             LOGGER.error(f"Can't process a worksheet {sheet_name} because of:\n{e}", )
 
 
-def process_worksheet(gsheets_loader, sheet_name, worksheet, config):
+def process_worksheet(gsheets_loader, sheet_name, worksheet, start_from_row, config):
     if worksheet is None:
         name_with_worksheet = sheet_name
     else:
@@ -59,8 +64,9 @@ def process_worksheet(gsheets_loader, sheet_name, worksheet, config):
     else:
         stream_name = tableize(parameterize(name_with_worksheet))
 
-    schema = gsheets_loader.get_schema(sheet_name, worksheet)
-    records = gsheets_loader.get_records_as_json(sheet_name, worksheet)
+    schema = gsheets_loader.get_schema(sheet_name, worksheet, start_from_row)
+
+    records = gsheets_loader.get_records_as_json(sheet_name, worksheet, start_from_row)
 
     # additional data transformations
     column_mapping = None

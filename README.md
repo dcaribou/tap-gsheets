@@ -72,6 +72,27 @@ Process several sheets and worksheets in that sheets at a time:
 }
 ```
 
+Specify the row number (1-based) to start processing from, in case you want to skip some unnecessary rows. The default number is 1.
+
+```hocon
+{ # config.conf
+  sheets = [
+    {
+      name = "Investor Loans",
+      start_from_row = 5,
+      worksheets = [
+        PageA,
+        PageB,
+        PageC
+      ]
+    },
+    {
+      # ...
+    }
+  ]
+}
+```
+
 # Overriding configuration
 The configurations in the file can be overriden with the command line parameter `--overrides`,
 which takes configuration overrides in a JSON string and applies them over the passed

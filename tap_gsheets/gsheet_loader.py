@@ -25,7 +25,7 @@ class GSheetsLoader:
         self.sheet_name = None
         self.spreadsheet = None
 
-    def get_data(self, sheet_name, worksheet_name):
+    def get_data(self, sheet_name, worksheet_name, start_from_row):
         # reset cache in case of switching to another sheet
         if self.sheet_name is None or self.sheet_name != sheet_name:
             del self.data
@@ -41,15 +41,15 @@ class GSheetsLoader:
 
         if worksheet_name not in self.data:
             sheet = self.spreadsheet.worksheet(worksheet_name)
-            self.data[worksheet_name] = sheet.get_all_records()
-            self.headers[worksheet_name] = sheet.row_values(1)
+            self.data[worksheet_name] = sheet.get_all_records(head=start_from_row)
+            self.headers[worksheet_name] = sheet.row_values(start_from_row)
 
-    def get_records_as_json(self, sheet_name, worksheet_name):
-        self.get_data(sheet_name, worksheet_name)
+    def get_records_as_json(self, sheet_name, worksheet_name, start_from_row):
+        self.get_data(sheet_name, worksheet_name, start_from_row)
         return self.data[worksheet_name]
 
-    def get_schema(self, sheet_name, worksheet_name):
-        self.get_data(sheet_name, worksheet_name)
+    def get_schema(self, sheet_name, worksheet_name, start_from_row):
+        self.get_data(sheet_name, worksheet_name, start_from_row)
 
         # add object to schema builder so he can infer schema
         builder = SchemaBuilder()
