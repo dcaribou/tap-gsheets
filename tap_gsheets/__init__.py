@@ -6,6 +6,7 @@ import json
 from pyhocon import ConfigFactory
 from inflection import parameterize, tableize, underscore
 import argparse
+from dateutil import parser
 
 LOGGER = singer.get_logger()
 
@@ -42,6 +43,11 @@ def sync(config):
         else:
             worksheets = []
 
+        if "date_format" in sheet:
+            gsheet_loader.date_format = sheet["date_format"]
+        else:
+            gsheet_loader.date_format = ""
+
         # noinspection PyBroadException
         try:
             if len(worksheets) > 0:
@@ -64,9 +70,13 @@ def process_worksheet(gsheets_loader, sheet_name, worksheet, start_from_row, con
     else:
         stream_name = tableize(parameterize(name_with_worksheet))
 
+    records = gsheets_loader.get_records_as_json(sheet_name, worksheet, start_from_row)
+
+    if gsheet_loader.date_format:
+        non_standard_date_execution(records)
+
     schema = gsheets_loader.get_schema(sheet_name, worksheet, start_from_row)
 
-    records = gsheets_loader.get_records_as_json(sheet_name, worksheet, start_from_row)
 
     # additional data transformations
     column_mapping = None
@@ -99,6 +109,15 @@ def process_worksheet(gsheets_loader, sheet_name, worksheet, start_from_row, con
 
         singer.write_record(stream_name, record_transformed)
 
+
+def non_standard_date_execution(records):
+    for record in records:
+        for field in record:
+            try:
+                d = parser.parse(record[field])
+                record[field] = (d.replace(tzinfo=None) + d.utcoffset()).strftime(gsheet_loader.date_format)
+            except (TypeError, ValueError) as exception:
+                pass
 
 def main():
 

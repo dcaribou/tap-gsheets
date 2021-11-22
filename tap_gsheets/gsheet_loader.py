@@ -1,12 +1,13 @@
 import gspread
 from gspread.utils import numericise_all
-from genson import SchemaBuilder
+from genson import SchemaBuilder, TypedSchemaStrategy
 from singer.schema import Schema
 from oauth2client.service_account import ServiceAccountCredentials
 import logging
+import datetime
 
 logging.getLogger('oauth2client').setLevel(logging.ERROR)
-
+date_format = None
 
 class GSheetsLoader:
     """Wrapper for authenticating and retrieving data from Google Sheets"""
@@ -52,7 +53,7 @@ class GSheetsLoader:
         self.get_data(sheet_name, worksheet_name, start_from_row)
 
         # add object to schema builder so he can infer schema
-        builder = SchemaBuilder()
+        builder = CustomSchemaBuilder()
         if len(self.data[worksheet_name]) == 0:
             # build sample record to be used for schema inference if the
             # spreadsheet is empty
@@ -67,3 +68,40 @@ class GSheetsLoader:
         self.schema[worksheet_name] = singer_schema.to_dict()
 
         return self.schema[worksheet_name]
+
+
+class CustomDateTime(TypedSchemaStrategy):
+    """
+    strategy for date-time formatted strings
+    """
+    JS_TYPE = 'string'
+    PYTHON_TYPE = (str, type(u''))
+
+    # create a new instance variable
+    def __init__(self, node_class):
+        super().__init__(node_class)
+        self.format = "date-time"
+        self.timestamp = None
+
+    @classmethod
+    def match_object(self, obj):
+        super().match_object(obj)
+        try:
+            date_time_obj = datetime.datetime.strptime(obj, "{}".format(date_format))
+            if isinstance(date_time_obj, datetime.datetime):
+                return True
+            else:
+                return False
+        except (TypeError, ValueError) as exception:
+            #print(exception)
+            return False
+
+    def to_schema(self):
+        schema = super().to_schema()
+        schema['type'] = self.JS_TYPE
+        schema['format'] = self.format
+        return schema
+
+class CustomSchemaBuilder(SchemaBuilder):
+    """ detects & labels date-time formatted strings """
+    EXTRA_STRATEGIES = (CustomDateTime,)
