@@ -72,6 +72,28 @@ Process several sheets and worksheets in that sheets at a time:
 }
 ```
 
+Define date field as date format. Date fields will be process as string without date_from:
+
+```hocon
+{ # config.conf
+  sheets = [
+    {
+      name = "Investor Loans",
+      worksheets = [
+        PageA,
+        PageB,
+        PageC
+      ],
+    date_from = "%Y-%m-%d" 
+    },
+    {
+      # ...
+    }
+  ]
+}
+```
+
+
 Specify the row number (1-based) to start processing from, in case you want to skip some unnecessary rows. The default number is 1.
 
 ```hocon
